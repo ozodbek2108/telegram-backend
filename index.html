@@ -226,6 +226,13 @@
             font-weight: 900;
         }
 
+        .nav-badge.dot {
+            width: 8px;
+            height: 8px;
+            padding: 0;
+            border-radius: 50%;
+        }
+
         .sidebar-footer {
             margin-top: auto;
             padding: 16px 20px;
@@ -384,6 +391,12 @@
             color: var(--accent);
         }
 
+        .live-badge.warn {
+            background: rgba(249, 202, 36, .12);
+            border-color: rgba(249, 202, 36, .25);
+            color: var(--gold);
+        }
+
         .live-dot {
             width: 7px;
             height: 7px;
@@ -394,6 +407,10 @@
 
         .live-badge.offline .live-dot {
             background: var(--accent);
+        }
+
+        .live-badge.warn .live-dot {
+            background: var(--gold);
         }
 
         @keyframes livePulse {
@@ -522,6 +539,13 @@
             background: rgba(255, 255, 255, .14);
         }
 
+        .btn-primary:disabled,
+        .btn-secondary:disabled,
+        .btn-danger:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
         /* Form */
         .form-group {
             margin-bottom: 16px;
@@ -637,6 +661,11 @@
             margin-bottom: 18px;
         }
 
+        .note-banner.blue {
+            background: rgba(124, 92, 252, .07);
+            border-color: rgba(124, 92, 252, .22);
+        }
+
         .note-banner .ni {
             font-size: 16px;
             flex-shrink: 0;
@@ -644,6 +673,10 @@
 
         .note-banner b {
             color: var(--gold);
+        }
+
+        .note-banner.blue b {
+            color: var(--neon);
         }
 
         /* Toggle */
@@ -1602,6 +1635,95 @@
             font-family: monospace;
         }
 
+        /* ===== Telegram ulanishi bo'limi ===== */
+        .tg-wizard {
+            padding: 20px;
+        }
+
+        .tg-step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--txt-muted);
+            margin-bottom: 16px;
+            letter-spacing: .3px;
+        }
+
+        .tg-step-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-glass2);
+            border: 1px solid var(--border-bright);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .tg-step-dot.done {
+            background: var(--grad-green);
+            border-color: transparent;
+        }
+
+        .tg-step-dot.current {
+            background: var(--grad-primary);
+            border-color: transparent;
+            box-shadow: 0 0 0 4px rgba(124, 92, 252, .18);
+        }
+
+        .tg-connected-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px;
+            border-radius: var(--radius-md);
+            background: rgba(16, 185, 129, .08);
+            border: 1px solid rgba(16, 185, 129, .25);
+        }
+
+        .tg-connected-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: var(--grad-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .tg-guide-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .tg-guide-list li {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 12.5px;
+            color: var(--txt-secondary);
+            line-height: 1.5;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .tg-guide-list li:last-child {
+            border-bottom: none;
+        }
+
+        .tg-guide-list b {
+            color: var(--txt-primary);
+        }
+
+        .tg-guide-list .gi {
+            flex-shrink: 0;
+        }
+
         /* Mobile sidebar overlay */
         #sidebar-overlay {
             display: none;
@@ -1724,6 +1846,10 @@
             </a>
 
             <div class="sidebar-section-label">Tizim</div>
+            <a class="nav-link" data-tab="telegram" onclick="switchTab('telegram')">
+                <span class="nav-link-icon">📡</span> Telegram ulanishi
+                <span class="nav-badge dot" id="tg-nav-dot" style="background:var(--accent);"></span>
+            </a>
             <a class="nav-link" data-tab="settings" onclick="switchTab('settings')">
                 <span class="nav-link-icon">⚙️</span> Sozlamalar
             </a>
@@ -2076,6 +2202,68 @@
                 </div>
 
                 <!-- ══════════════════════════════
+           TAB: TELEGRAM ULANISHI (YANGI)
+           ══════════════════════════════ -->
+                <div id="tab-telegram" class="tab-screen">
+
+                    <div class="note-banner blue">
+                        <span class="ni">📡</span>
+                        <div>
+                            Bu yerda backendga <b>qaysi Telegram akkaunti</b> ulanishini siz o'zingiz, kodga
+                            tegmasdan, to'g'ridan-to'g'ri shu sahifadan sozlaysiz. API ID/Hash, telefon raqam,
+                            tasdiqlash kodi va (agar yoqilgan bo'lsa) 2 bosqichli himoya paroli — barchasi shu
+                            yerdan kiritiladi. Boshqa akkauntga o'tmoqchi bo'lsangiz, avval "Uzish" tugmasini
+                            bosing, so'ng yangi raqam bilan qaytadan ulang.
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:20px;" id="tg-grid">
+
+                        <!-- Chap: forma / holat -->
+                        <div class="card tg-wizard" id="tg-form-card">
+                            <div id="tg-status-area">Yuklanmoqda…</div>
+                        </div>
+
+                        <!-- O'ng: qo'llanma -->
+                        <div class="howto-card">
+                            <div class="section-title" style="margin-bottom:6px;">📘 Qanday ulash kerak — to'liq
+                                qo'llanma</div>
+                            <ol class="tg-guide-list" style="list-style:none;">
+                                <li><span class="gi">1️⃣</span><span><b>API ID va API Hash oling.</b>
+                                        <a href="https://my.telegram.org" target="_blank"
+                                            style="color:var(--neon);">my.telegram.org</a> saytiga öz telefon
+                                        raqamingiz bilan kiring → "API development tools" bo'limiga o'ting → yangi
+                                        ilova yarating (nomi va platforma ixtiyoriy) → sizga <b>api_id</b> (raqam) va
+                                        <b>api_hash</b> (harf-raqamli kod) beriladi.</span></li>
+                                <li><span class="gi">2️⃣</span><span><b>Shu sahifaga API ID, API Hash va telefon
+                                            raqamingizni kiriting</b> (xalqaro formatda, masalan
+                                        <code>+998901234567</code>) va <b>"Kod yuborish"</b> tugmasini bosing.</span>
+                                </li>
+                                <li><span class="gi">3️⃣</span><span><b>Telegram ilovangizga kod keladi</b>
+                                        (Telegram'ning rasmiy "Telegram" xabari sifatida, ba'zan SMS orqali ham
+                                        kelishi mumkin). Kelgan raqamlarni shu sahifadagi "Kod" maydoniga kiriting va
+                                        <b>"Tasdiqlash"</b> tugmasini bosing.</span></li>
+                                <li><span class="gi">4️⃣</span><span><b>Agar akkauntingizda 2 bosqichli himoya (Two-Step
+                                            Verification / Cloud Password) yoqilgan bo'lsa</b>, tizim avtomatik
+                                        ravishda qo'shimcha "Parol" maydonini chiqaradi — o'sha parolni kiriting va
+                                        yana tasdiqlang. Agar 2 bosqichli himoya yoqilmagan bo'lsa, bu qadam umuman
+                                        chiqmaydi.</span></li>
+                                <li><span class="gi">✅</span><span><b>Tayyor!</b> Holat "✅ Ulangan" deb
+                                        o'zgaradi va shu raqam ko'rsatiladi. Endi "Video yuklash" bo'limidan
+                                        Telegram havolalari orqali video qo'sha olasiz.</span></li>
+                                <li><span class="gi">🔁</span><span><b>Boshqa akkauntga o'tish:</b> "Uzish"
+                                        tugmasini bosing (joriy sessiya butunlay o'chadi), so'ng yangi raqam bilan
+                                        1-qadamdan qaytadan boshlang.</span></li>
+                            </ol>
+                            <div class="form-hint" style="margin-top:14px;">
+                                ⚠️ API Hash va tasdiqlash kodi — akkauntingizga to'liq kirish huquqi beradi.
+                                Bu sahifani faqat ishonchli adminlar ko'rishi kerak.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════
            TAB: SETTINGS
            ══════════════════════════════ -->
                 <div id="tab-settings" class="tab-screen">
@@ -2092,6 +2280,17 @@
                         <div class="config-row">
                             <button class="btn-secondary" style="margin-left:auto;" onclick="saveConfig()">Saqlash va
                                 qayta ulanish</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-section-head">Telegram</div>
+                        <div class="settings-item">
+                            <span class="si-icon">📡</span>
+                            <span class="si-label">Telegram ulanish holati</span>
+                            <span class="si-right" id="settings-tg-status">Tekshirilmoqda…</span>
+                            <button class="btn-secondary" style="padding:7px 14px;font-size:12px;"
+                                onclick="switchTab('telegram')">Boshqarish</button>
                         </div>
                     </div>
 
@@ -2220,6 +2419,9 @@
 
         let selectedThumbFile = null; // Tanlangan muqova rasm fayli (yuklashdan oldin)
 
+        // Telegram ulanish holati (backenddan kelgan)
+        let tgStatus = { status: 'not_configured', phone: null, error: null };
+
         const CATEGORY_EMOJI = {
             "Jangari": "⚔️", "Drama": "🎭", "Fantastika": "🚀", "Komediya": "😂",
             "Hujjatli": "📽️", "Triller": "🔍", "Romantik": "💖", "Qo'rqinchli": "👻",
@@ -2294,11 +2496,213 @@
                 const res = await fetch(`${BACKEND_URL}/`, { method: 'GET' });
                 if (!res.ok) throw new Error('offline');
                 const data = await res.json();
-                badge.classList.remove('offline');
-                text.textContent = data.telegram_authorized ? 'Backend ulandi' : 'Backend ulandi (Telegram kutilmoqda)';
+                badge.classList.remove('offline', 'warn');
+                if (data.telegram_authorized) {
+                    text.textContent = 'Backend ulandi · Telegram ✅';
+                } else {
+                    badge.classList.add('warn');
+                    text.textContent = 'Backend ulandi · Telegram ulanmagan';
+                }
             } catch (err) {
+                badge.classList.remove('warn');
                 badge.classList.add('offline');
                 text.textContent = 'Backend offline';
+            }
+        }
+
+        /* ============================================================
+           TELEGRAM ULANISHI (yangi bo'lim)
+           ============================================================ */
+        async function loadTelegramStatus() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/telegram/status`);
+                tgStatus = await res.json();
+            } catch (e) {
+                tgStatus = { status: 'unknown', phone: null, error: "Backend bilan bog'lanib bo'lmadi" };
+            }
+            updateTelegramNavBadge();
+            return tgStatus;
+        }
+
+        function updateTelegramNavBadge() {
+            const dot = document.getElementById('tg-nav-dot');
+            if (!dot) return;
+            if (tgStatus.status === 'connected') dot.style.background = 'var(--green)';
+            else if (tgStatus.status === 'code_sent' || tgStatus.status === 'awaiting_password') dot.style.background = 'var(--gold)';
+            else dot.style.background = 'var(--accent)';
+
+            const settingsRight = document.getElementById('settings-tg-status');
+            if (settingsRight) {
+                const labels = {
+                    connected: `✅ Ulangan (${tgStatus.phone || ''})`,
+                    code_sent: '🟡 Kod kutilmoqda',
+                    awaiting_password: '🟡 Parol kutilmoqda',
+                    not_configured: '🔴 Ulanmagan',
+                    unknown: '⚪ Noma\'lum',
+                };
+                settingsRight.textContent = labels[tgStatus.status] || tgStatus.status;
+            }
+        }
+
+        async function renderTelegramTab() {
+            await loadTelegramStatus();
+            const area = document.getElementById('tg-status-area');
+
+            if (tgStatus.status === 'connected') {
+                area.innerHTML = `
+      <div class="tg-connected-box">
+        <div class="tg-connected-icon">✅</div>
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:15px;margin-bottom:3px;">Telegram ulangan</div>
+          <div style="font-size:13px;color:var(--txt-secondary);">Faol raqam: <b>${escapeHtml(tgStatus.phone || '—')}</b></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button class="btn-danger" style="flex:1;" onclick="tgDisconnect()">🔌 Uzish</button>
+      </div>
+      <div class="form-hint" style="margin-top:10px;">Boshqa akkaunt ulamoqchi bo'lsangiz, avval shu raqamni uzing, so'ng yangisini kiriting.</div>
+    `;
+                return;
+            }
+
+            if (tgStatus.status === 'code_sent') {
+                area.innerHTML = `
+      <div class="tg-step-badge"><span class="tg-step-dot done">1</span> API ma'lumotlari <span class="tg-step-dot current">2</span> Kodni tasdiqlash <span class="tg-step-dot">3</span> Tayyor</div>
+      <div class="form-group">
+        <label class="form-label">Telegramga kelgan kod</label>
+        <input class="form-input" id="tg-code-input" placeholder="12345" inputmode="numeric">
+        <div class="form-hint">Kod ${escapeHtml(tgStatus.phone || '')} raqamiga bog'liq Telegram ilovasiga (yoki SMS orqali) yuborildi.</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-primary" style="flex:1;" onclick="tgVerifyCode()" id="tg-verify-code-btn">Tasdiqlash</button>
+        <button class="btn-secondary" onclick="tgDisconnect()">Bekor qilish</button>
+      </div>
+    `;
+                return;
+            }
+
+            if (tgStatus.status === 'awaiting_password') {
+                area.innerHTML = `
+      <div class="tg-step-badge"><span class="tg-step-dot done">1</span> API ma'lumotlari <span class="tg-step-dot done">2</span> Kod <span class="tg-step-dot current">3</span> 2 bosqichli himoya</div>
+      <div class="note-banner" style="margin-bottom:14px;">
+        <span class="ni">🔐</span>
+        <div>Bu akkauntda <b>2 bosqichli himoya (Cloud Password)</b> yoqilgan. Davom etish uchun shu parolni kiriting.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telegram bulutli paroli</label>
+        <input class="form-input" type="password" id="tg-password-input" placeholder="••••••••">
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-primary" style="flex:1;" onclick="tgVerifyPassword()" id="tg-verify-pass-btn">Kirish</button>
+        <button class="btn-secondary" onclick="tgDisconnect()">Bekor qilish</button>
+      </div>
+    `;
+                return;
+            }
+
+            // not_configured yoki unknown -> boshlang'ich forma
+            area.innerHTML = `
+    <div class="tg-step-badge"><span class="tg-step-dot current">1</span> API ma'lumotlari <span class="tg-step-dot">2</span> Kod <span class="tg-step-dot">3</span> Tayyor</div>
+    ${tgStatus.status === 'unknown' ? `<div class="note-banner"><span class="ni">⚠️</span><div>${escapeHtml(tgStatus.error || "Backend bilan bog'lanib bo'lmadi.")}</div></div>` : ''}
+    <div class="form-group">
+      <label class="form-label">API ID</label>
+      <input class="form-input" id="tg-apiid-input" placeholder="Masalan: 38464467" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label class="form-label">API Hash</label>
+      <input class="form-input" id="tg-apihash-input" placeholder="my.telegram.org saytidan olingan hash">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Telefon raqam</label>
+      <input class="form-input" id="tg-phone-input" placeholder="+998901234567">
+      <div class="form-hint">Xalqaro formatda, mamlakat kodi bilan kiriting (+998...).</div>
+    </div>
+    <button class="btn-primary" style="width:100%;" onclick="tgConfigure()" id="tg-configure-btn">📨 Kod yuborish</button>
+  `;
+        }
+
+        async function tgConfigure() {
+            const apiId = document.getElementById('tg-apiid-input').value.trim();
+            const apiHash = document.getElementById('tg-apihash-input').value.trim();
+            const phone = document.getElementById('tg-phone-input').value.trim();
+            if (!apiId || !apiHash || !phone) { showToast("API ID, API Hash va telefon raqamni to'liq kiriting", 'error'); return; }
+
+            const btn = document.getElementById('tg-configure-btn');
+            btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span> Yuborilmoqda…';
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/telegram/configure`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_id: parseInt(apiId, 10), api_hash: apiHash, phone })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.detail || "Kod yuborib bo'lmadi");
+                showToast('Tasdiqlash kodi yuborildi 📨', 'success');
+                pushActivity('📡', 'rgba(124,92,252,.12)', `Telegram kodi yuborildi: ${phone}`);
+                await renderTelegramTab();
+            } catch (e) {
+                showToast(e.message, 'error');
+                btn.disabled = false; btn.innerHTML = '📨 Kod yuborish';
+            }
+        }
+
+        async function tgVerifyCode() {
+            const code = document.getElementById('tg-code-input').value.trim();
+            if (!code) { showToast("Kodni kiriting", 'error'); return; }
+            const btn = document.getElementById('tg-verify-code-btn');
+            btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span> Tekshirilmoqda…';
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/telegram/verify-code`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.detail || "Kodni tasdiqlab bo'lmadi");
+                if (data.status === 'connected') {
+                    showToast('Telegram muvaffaqiyatli ulandi! ✅', 'success');
+                    pushActivity('✅', 'rgba(16,185,129,.12)', 'Telegram ulandi');
+                } else if (data.status === 'awaiting_password') {
+                    showToast('2 bosqichli himoya aniqlandi, parolni kiriting', 'info');
+                }
+                await renderTelegramTab();
+                await checkBackendStatus();
+            } catch (e) {
+                showToast(e.message, 'error');
+                btn.disabled = false; btn.innerHTML = 'Tasdiqlash';
+            }
+        }
+
+        async function tgVerifyPassword() {
+            const password = document.getElementById('tg-password-input').value;
+            if (!password) { showToast("Parolni kiriting", 'error'); return; }
+            const btn = document.getElementById('tg-verify-pass-btn');
+            btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span> Tekshirilmoqda…';
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/telegram/verify-password`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.detail || "Parolni tasdiqlab bo'lmadi");
+                showToast('Telegram muvaffaqiyatli ulandi! ✅', 'success');
+                pushActivity('✅', 'rgba(16,185,129,.12)', 'Telegram ulandi (2FA)');
+                await renderTelegramTab();
+                await checkBackendStatus();
+            } catch (e) {
+                showToast(e.message, 'error');
+                btn.disabled = false; btn.innerHTML = 'Kirish';
+            }
+        }
+
+        async function tgDisconnect() {
+            if (tgStatus.status === 'connected' && !confirm("Telegram ulanishini uzmoqchimisiz?")) return;
+            try {
+                await fetch(`${BACKEND_URL}/api/telegram/disconnect`, { method: 'POST' });
+                showToast('Telegram uzildi', 'warning');
+                pushActivity('🔌', 'rgba(246,79,89,.12)', 'Telegram uzildi');
+                await renderTelegramTab();
+                await checkBackendStatus();
+            } catch (e) {
+                showToast("Server bilan bog'lanib bo'lmadi", 'error');
             }
         }
 
@@ -2324,6 +2728,7 @@
             upload: ['Video yuklash', 'Telegramdan video qo\'shish'],
             users: ['Foydalanuvchilar', 'A\'zolarni boshqarish'],
             notifications: ['Bildirishnomalar', 'Xabarlarni yuborish va boshqarish'],
+            telegram: ['Telegram ulanishi', 'Akkaunt ulash va boshqarish'],
             settings: ['Sozlamalar', 'Platforma konfiguratsiyasi'],
         };
 
@@ -2349,7 +2754,8 @@
                 case 'videos': renderVideosTable(); break;
                 case 'users': loadUsersFromFirebase().then(() => renderUsers()); break;
                 case 'notifications': renderNotifications(); break;
-                case 'settings': loadConfigInputs(); break;
+                case 'telegram': renderTelegramTab(); break;
+                case 'settings': loadConfigInputs(); loadTelegramStatus(); break;
             }
         }
 
@@ -2415,6 +2821,7 @@
             await checkBackendStatus();
             const ok = await loadVideosFromFirebase();
             await loadUsersFromFirebase();
+            await loadTelegramStatus();
             btn.classList.remove('spinning');
             if (ok) {
                 showToast('Ma\'lumotlar yangilandi!', 'success');
@@ -2960,7 +3367,7 @@
             videosLoaded = false;
             usersLoaded = false;
             checkBackendStatus();
-            Promise.all([loadVideosFromFirebase(), loadUsersFromFirebase()]).then(() => onTabEnter('videos'));
+            Promise.all([loadVideosFromFirebase(), loadUsersFromFirebase(), loadTelegramStatus()]).then(() => onTabEnter('videos'));
         }
 
         function exportData() {
@@ -2998,6 +3405,7 @@
             checkBackendStatus();
             await loadVideosFromFirebase();
             await loadUsersFromFirebase();
+            await loadTelegramStatus();
             renderDashboard();
             showToast('Admin Panel yuklandi ⚡', 'success');
         });
