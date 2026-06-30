@@ -1,0 +1,3007 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08080f">
+    <title>StreamX – Admin Panel</title>
+    <style>
+        /* =============================================
+   TOKENS & RESET
+   ============================================= */
+        :root {
+            --bg-base: #08080f;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-glass: rgba(255, 255, 255, 0.07);
+            --bg-glass2: rgba(255, 255, 255, 0.11);
+            --border: rgba(255, 255, 255, 0.09);
+            --border-bright: rgba(255, 255, 255, 0.18);
+
+            --neon: #7c5cfc;
+            --neon2: #c471ed;
+            --accent: #f64f59;
+            --gold: #f9ca24;
+            --green: #10b981;
+
+            --grad-primary: linear-gradient(135deg, #7c5cfc, #c471ed);
+            --grad-warm: linear-gradient(135deg, #f64f59, #c471ed);
+            --grad-green: linear-gradient(135deg, #10b981, #059669);
+
+            --txt-primary: #f0f0ff;
+            --txt-secondary: rgba(240, 240, 255, 0.55);
+            --txt-muted: rgba(240, 240, 255, 0.32);
+
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+
+            --shadow-neon: 0 0 24px rgba(124, 92, 252, 0.3);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bot: env(safe-area-inset-bottom, 0px);
+
+            --sidebar-w: 240px;
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: var(--bg-base);
+            color: var(--txt-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: inherit;
+            font: inherit;
+        }
+
+        input,
+        textarea,
+        select {
+            font: inherit;
+            color: inherit;
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(124, 92, 252, .35);
+            border-radius: 10px;
+        }
+
+        ::selection {
+            background: rgba(124, 92, 252, .35);
+        }
+
+        /* =============================================
+   LAYOUT
+   ============================================= */
+        #app {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* =============================================
+   SIDEBAR
+   ============================================= */
+        #sidebar {
+            width: var(--sidebar-w);
+            flex-shrink: 0;
+            background: rgba(10, 10, 18, 0.95);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            transition: transform .3s var(--ease-smooth);
+            z-index: 200;
+        }
+
+        .sidebar-logo {
+            padding: 24px 20px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            background: var(--grad-warm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 20px rgba(246, 79, 89, .3);
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: -.3px;
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            color: var(--txt-muted);
+            font-weight: 600;
+            letter-spacing: .5px;
+        }
+
+        .sidebar-section-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            color: var(--txt-muted);
+            text-transform: uppercase;
+            padding: 18px 20px 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--txt-secondary);
+            border-radius: 0;
+            transition: all .15s;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-glass);
+            color: var(--txt-primary);
+        }
+
+        .nav-link.active {
+            background: rgba(124, 92, 252, .12);
+            color: var(--neon);
+        }
+
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: var(--neon);
+        }
+
+        .nav-link-icon {
+            font-size: 17px;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--accent);
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .admin-profile-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: var(--radius-md);
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+        }
+
+        .admin-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: var(--grad-warm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .admin-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .admin-role {
+            font-size: 10px;
+            color: var(--txt-muted);
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            margin-left: auto;
+            box-shadow: 0 0 6px rgba(16, 185, 129, .6);
+            flex-shrink: 0;
+        }
+
+        /* =============================================
+   MAIN CONTENT
+   ============================================= */
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        /* Top bar */
+        #topbar {
+            padding: 14px 24px;
+            background: rgba(8, 8, 15, .9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-menu-btn {
+            display: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -.3px;
+        }
+
+        .page-subtitle {
+            font-size: 12px;
+            color: var(--txt-muted);
+        }
+
+        .topbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topbar-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all .15s;
+            position: relative;
+        }
+
+        .topbar-btn:hover {
+            background: var(--bg-glass2);
+        }
+
+        .topbar-btn.spinning {
+            animation: spin 0.8s linear infinite;
+        }
+
+        .topbar-notif-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg-base);
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, .12);
+            border: 1px solid rgba(16, 185, 129, .25);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .live-badge.offline {
+            background: rgba(246, 79, 89, .12);
+            border-color: rgba(246, 79, 89, .25);
+            color: var(--accent);
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: livePulse 1.5s ease-in-out infinite;
+        }
+
+        .live-badge.offline .live-dot {
+            background: var(--accent);
+        }
+
+        @keyframes livePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .3;
+            }
+        }
+
+        /* Content area */
+        #content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 24px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* =============================================
+   SCREENS (tabs)
+   ============================================= */
+        .tab-screen {
+            display: none;
+        }
+
+        .tab-screen.active {
+            display: block;
+        }
+
+        /* =============================================
+   SHARED COMPONENTS
+   ============================================= */
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            transition: border-color .2s;
+        }
+
+        .card:hover {
+            border-color: var(--border-bright);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 22px;
+            border-radius: var(--radius-md);
+            background: var(--grad-primary);
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(124, 92, 252, .35);
+            transition: all .2s var(--ease-spring);
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(124, 92, 252, .5);
+        }
+
+        .btn-primary:active {
+            transform: scale(.96);
+        }
+
+        .btn-primary:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            background: rgba(246, 79, 89, .12);
+            border: 1px solid rgba(246, 79, 89, .3);
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 700;
+            transition: all .2s;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background: rgba(246, 79, 89, .2);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            background: var(--bg-glass2);
+            border: 1px solid var(--border-bright);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all .2s;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, .14);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--txt-muted);
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            transition: border-color .2s, box-shadow .2s;
+            color: var(--txt-primary);
+        }
+
+        .form-input:focus {
+            border-color: var(--neon);
+            box-shadow: 0 0 0 3px rgba(124, 92, 252, .13);
+        }
+
+        .form-input::placeholder {
+            color: var(--txt-muted);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--txt-primary);
+            cursor: pointer;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 90px;
+            line-height: 1.55;
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: var(--txt-muted);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* Tag / badge */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(124, 92, 252, .15);
+            color: var(--neon);
+            border: 1px solid rgba(124, 92, 252, .25);
+        }
+
+        .tag.green {
+            background: rgba(16, 185, 129, .12);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, .25);
+        }
+
+        .tag.red {
+            background: rgba(246, 79, 89, .12);
+            color: #fca5a5;
+            border-color: rgba(246, 79, 89, .25);
+        }
+
+        .tag.gold {
+            background: rgba(249, 202, 36, .1);
+            color: var(--gold);
+            border-color: rgba(249, 202, 36, .25);
+        }
+
+        .tag.muted {
+            background: rgba(255, 255, 255, .06);
+            color: var(--txt-muted);
+            border-color: var(--border);
+            font-size: 9px;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            padding: 2px 7px;
+        }
+
+        /* Demo bo'limlar uchun ogohlandiruvchi banner */
+        .note-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: rgba(249, 202, 36, .07);
+            border: 1px solid rgba(249, 202, 36, .22);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 12.5px;
+            color: var(--txt-secondary);
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .note-banner .ni {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .note-banner b {
+            color: var(--gold);
+        }
+
+        /* Toggle */
+        .toggle {
+            width: 44px;
+            height: 24px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid var(--border);
+            position: relative;
+            cursor: pointer;
+            transition: background .2s;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+
+        .toggle.on {
+            background: var(--neon);
+        }
+
+        .toggle-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform .2s var(--ease-spring);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+        }
+
+        .toggle.on .toggle-thumb {
+            transform: translateX(20px);
+        }
+
+        /* Toast */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            min-width: 280px;
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-bright);
+            box-shadow: var(--shadow-card);
+            animation: toastIn .3s var(--ease-spring);
+            pointer-events: all;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .toast.success {
+            background: rgba(16, 185, 129, .15);
+            border-color: rgba(16, 185, 129, .3);
+            color: #6ee7b7;
+        }
+
+        .toast.error {
+            background: rgba(246, 79, 89, .15);
+            border-color: rgba(246, 79, 89, .3);
+            color: #fca5a5;
+        }
+
+        .toast.info {
+            background: rgba(124, 92, 252, .15);
+            border-color: rgba(124, 92, 252, .3);
+            color: #c4b5fd;
+        }
+
+        .toast.warning {
+            background: rgba(249, 202, 36, .1);
+            border-color: rgba(249, 202, 36, .25);
+            color: var(--gold);
+        }
+
+        /* Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, .04) 0%, rgba(255, 255, 255, .09) 50%, rgba(255, 255, 255, .04) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-sm);
+        }
+
+        @keyframes shimmer {
+            from {
+                background-position: 200% 0;
+            }
+
+            to {
+                background-position: -200% 0;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-sm {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, .35);
+            border-top-color: #fff;
+            animation: spin .7s linear infinite;
+            vertical-align: middle;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--txt-muted);
+        }
+
+        .empty-state .ei {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        /* =============================================
+   DASHBOARD TAB
+   ============================================= */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color .2s, transform .2s var(--ease-spring);
+            cursor: default;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-bright);
+            transform: translateY(-2px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--grad-primary);
+            opacity: .7;
+        }
+
+        .stat-card.warm::before {
+            background: var(--grad-warm);
+        }
+
+        .stat-card.green::before {
+            background: var(--grad-green);
+        }
+
+        .stat-card.gold::before {
+            background: linear-gradient(135deg, #f9ca24, #f0932b);
+        }
+
+        .stat-icon {
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        .stat-val {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -.5px;
+            margin-bottom: 2px;
+            background: var(--grad-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card.warm .stat-val {
+            background: var(--grad-warm);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .stat-card.green .stat-val {
+            background: var(--grad-green);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .stat-card.gold .stat-val {
+            background: linear-gradient(135deg, #f9ca24, #f0932b);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--txt-muted);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: 700;
+        }
+
+        .stat-change.pos {
+            color: #6ee7b7;
+        }
+
+        .stat-change.neg {
+            color: #fca5a5;
+        }
+
+        .stat-change.neutral {
+            color: var(--txt-muted);
+        }
+
+        /* Charts row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        /* Bar chart */
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 130px;
+        }
+
+        .bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .bar-val {
+            font-size: 9px;
+            color: var(--txt-muted);
+            font-weight: 700;
+        }
+
+        .bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            background: var(--grad-primary);
+            transition: height .9s var(--ease-spring);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .bar:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 32, .95);
+            border: 1px solid var(--border-bright);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .bar-label {
+            font-size: 10px;
+            color: var(--txt-muted);
+        }
+
+        /* Donut chart */
+        .donut-wrap {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 14px;
+        }
+
+        .donut-svg {
+            transform: rotate(-90deg);
+        }
+
+        .donut-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .donut-val {
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .donut-sub {
+            font-size: 10px;
+            color: var(--txt-muted);
+        }
+
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Activity feed */
+        .activity-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .act-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .act-info {
+            flex: 1;
+        }
+
+        .act-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .act-time {
+            font-size: 11px;
+            color: var(--txt-muted);
+        }
+
+        /* =============================================
+   VIDEOS TAB
+   ============================================= */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0 14px;
+            height: 40px;
+            flex: 1;
+            min-width: 180px;
+            transition: border-color .2s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--neon);
+        }
+
+        .search-box input {
+            flex: 1;
+            font-size: 14px;
+            color: var(--txt-primary);
+        }
+
+        .search-box input::placeholder {
+            color: var(--txt-muted);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 10px 14px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .8px;
+            color: var(--txt-muted);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, .02);
+        }
+
+        .data-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255, 255, 255, .025);
+        }
+
+        .data-table .thumb-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .video-thumb-sm {
+            width: 52px;
+            height: 34px;
+            border-radius: 6px;
+            background: var(--bg-glass2);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            overflow: hidden;
+        }
+
+        .video-thumb-sm img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all .15s;
+            cursor: pointer;
+        }
+
+        .action-btn.edit {
+            background: rgba(124, 92, 252, .12);
+            color: var(--neon);
+        }
+
+        .action-btn.del {
+            background: rgba(246, 79, 89, .1);
+            color: var(--accent);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* =============================================
+   UPLOAD TAB
+   ============================================= */
+        .upload-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .howto-card {
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            background: var(--bg-glass);
+        }
+
+        .howto-step {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .howto-step:last-child {
+            border-bottom: none;
+        }
+
+        .howto-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--grad-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        .howto-text b {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .howto-text span {
+            font-size: 12px;
+            color: var(--txt-secondary);
+            line-height: 1.5;
+        }
+
+        .status-box {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            background: rgba(124, 92, 252, .08);
+            border: 1px solid rgba(124, 92, 252, .25);
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #c4b5fd;
+        }
+
+        .status-box.show {
+            display: flex;
+        }
+
+        .status-box.err {
+            background: rgba(246, 79, 89, .08);
+            border-color: rgba(246, 79, 89, .25);
+            color: #fca5a5;
+        }
+
+        /* Thumbnail upload bo'limi */
+        .thumb-upload-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .thumb-preview {
+            width: 78px;
+            height: 52px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-glass2);
+            border: 1px dashed var(--border-bright);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--txt-muted);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .thumb-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* =============================================
+   USERS TAB
+   ============================================= */
+        .users-filter {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            color: var(--txt-secondary);
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .filter-pill.active {
+            background: var(--neon);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+        .user-row:hover {
+            background: rgba(255, 255, 255, .025);
+        }
+
+        .user-avatar-sm {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: var(--grad-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .user-meta {
+            font-size: 12px;
+            color: var(--txt-muted);
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* =============================================
+   ANALYTICS TAB
+   ============================================= */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .metric-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--txt-muted);
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .metric-trend {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .metric-trend.up {
+            color: #6ee7b7;
+        }
+
+        .metric-trend.down {
+            color: #fca5a5;
+        }
+
+        .metric-val {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: var(--txt-muted);
+        }
+
+        /* Sparkline */
+        .sparkline {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 40px;
+            margin-top: 12px;
+        }
+
+        .spark-bar {
+            flex: 1;
+            border-radius: 2px 2px 0 0;
+            background: rgba(124, 92, 252, .25);
+            transition: height .6s var(--ease-spring);
+        }
+
+        .spark-bar.hi {
+            background: var(--neon);
+        }
+
+        /* =============================================
+   NOTIFICATIONS TAB
+   ============================================= */
+        .notif-compose {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .notif-sent-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .notif-icon-cell {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .notif-info {
+            flex: 1;
+        }
+
+        .notif-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+
+        .notif-title-txt {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .notif-body-txt {
+            font-size: 13px;
+            color: var(--txt-secondary);
+        }
+
+        .notif-footer-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .notif-time-txt {
+            font-size: 11px;
+            color: var(--txt-muted);
+        }
+
+        /* =============================================
+   SETTINGS TAB
+   ============================================= */
+        .settings-group {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .si-icon {
+            font-size: 20px;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .si-label {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .si-right {
+            color: var(--txt-muted);
+            font-size: 13px;
+        }
+
+        .settings-section-head {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--txt-muted);
+            text-transform: uppercase;
+            padding: 16px 20px 10px;
+        }
+
+        /* Sozlamalar: backend manzillarini ko'rsatish/o'zgartirish bloki */
+        .config-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .config-row:last-child {
+            border-bottom: none;
+        }
+
+        .config-row .si-label {
+            flex: 0 0 170px;
+        }
+
+        .config-row input {
+            flex: 1;
+            min-width: 200px;
+            padding: 9px 12px;
+            background: var(--bg-glass2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 12.5px;
+            font-family: monospace;
+        }
+
+        /* Mobile sidebar overlay */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            z-index: 150;
+        }
+
+        /* =============================================
+   RESPONSIVE
+   ============================================= */
+        @media(max-width:768px) {
+            #sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+                z-index: 200;
+            }
+
+            #sidebar.open {
+                transform: none;
+            }
+
+            #sidebar-overlay.open {
+                display: block;
+            }
+
+            .topbar-menu-btn {
+                display: flex;
+            }
+
+            #content {
+                padding: 16px;
+            }
+
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-area {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .config-row .si-label {
+                flex: 1 0 100%;
+            }
+        }
+
+        @media(max-width:480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stat-val {
+                font-size: 22px;
+            }
+
+            #toast-container {
+                right: 12px;
+                left: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toast-container"></div>
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <div id="app">
+        <!-- ══════════════════════════════
+       SIDEBAR
+       ══════════════════════════════ -->
+        <aside id="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon">⚡</div>
+                <div>
+                    <div class="logo-text">StreamX</div>
+                    <div class="logo-sub">ADMIN PANEL</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section-label">Umumiy ko'rinish</div>
+            <a class="nav-link active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                <span class="nav-link-icon">📊</span> Boshqaruv paneli
+            </a>
+            <a class="nav-link" data-tab="analytics" onclick="switchTab('analytics')">
+                <span class="nav-link-icon">📈</span> Analitika
+            </a>
+
+            <div class="sidebar-section-label">Kontent</div>
+            <a class="nav-link" data-tab="videos" onclick="switchTab('videos')">
+                <span class="nav-link-icon">🎬</span> Videolar
+                <span class="nav-badge" id="videos-count-badge">0</span>
+            </a>
+            <a class="nav-link" data-tab="upload" onclick="switchTab('upload')">
+                <span class="nav-link-icon">📤</span> Video yuklash
+            </a>
+
+            <div class="sidebar-section-label">Foydalanuvchilar</div>
+            <a class="nav-link" data-tab="users" onclick="switchTab('users')">
+                <span class="nav-link-icon">👥</span> Foydalanuvchilar
+                <span class="nav-badge" id="users-count-badge">0</span>
+            </a>
+
+            <div class="sidebar-section-label">Aloqa</div>
+            <a class="nav-link" data-tab="notifications" onclick="switchTab('notifications')">
+                <span class="nav-link-icon">🔔</span> Bildirishnomalar
+            </a>
+
+            <div class="sidebar-section-label">Tizim</div>
+            <a class="nav-link" data-tab="settings" onclick="switchTab('settings')">
+                <span class="nav-link-icon">⚙️</span> Sozlamalar
+            </a>
+
+            <div class="sidebar-footer">
+                <div class="admin-profile-chip">
+                    <div class="admin-avatar">👑</div>
+                    <div>
+                        <div class="admin-name">Admin</div>
+                        <div class="admin-role">Bosh administrator</div>
+                    </div>
+                    <div class="online-dot"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ══════════════════════════════
+       MAIN
+       ══════════════════════════════ -->
+        <div id="main">
+            <!-- Topbar -->
+            <div id="topbar">
+                <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
+                <div>
+                    <div class="page-title" id="page-title">Boshqaruv paneli</div>
+                    <div class="page-subtitle" id="page-subtitle">Xush kelibsiz, Admin!</div>
+                </div>
+                <div class="topbar-right">
+                    <div class="live-badge" id="backend-live-badge">
+                        <div class="live-dot"></div> <span id="backend-live-text">Tekshirilmoqda…</span>
+                    </div>
+                    <div class="topbar-btn" id="refresh-btn" onclick="refreshAll()" title="Ma'lumotlarni yangilash">
+                        🔄
+                    </div>
+                    <div class="topbar-btn" onclick="switchTab('notifications')">
+                        🔔
+                        <div class="topbar-notif-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div id="content">
+
+                <!-- ══════════════════════════════
+           TAB: DASHBOARD
+           ══════════════════════════════ -->
+                <div id="tab-dashboard" class="tab-screen active">
+
+                    <!-- Stat cards -->
+                    <div class="stats-grid" id="stat-cards"></div>
+
+                    <!-- Charts -->
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">📊 Hajm bo'yicha eng yirik videolar</div>
+                                <div class="tag">Top 7</div>
+                            </div>
+                            <div class="bar-chart" id="views-chart"></div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">🎭 Kategoriyalar bo'yicha</div>
+                            </div>
+                            <div class="donut-wrap">
+                                <svg class="donut-svg" width="130" height="130" viewBox="0 0 130 130"
+                                    id="donut-svg"></svg>
+                                <div class="donut-center">
+                                    <div class="donut-val" id="donut-val">0</div>
+                                    <div class="donut-sub">jami video</div>
+                                </div>
+                            </div>
+                            <div class="donut-legend" id="donut-legend"></div>
+                        </div>
+                    </div>
+
+                    <!-- Most watched + activity -->
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">🆕 So'nggi qo'shilgan videolar</div>
+                                <div class="tag">Eng yangi</div>
+                            </div>
+                            <div id="most-watched-dash"></div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">⚡ Joriy seans faoliyati</div>
+                                <span class="tag green">Real vaqt</span>
+                            </div>
+                            <div id="activity-feed"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ══════════════════════════════
+           TAB: ANALYTICS
+           ══════════════════════════════ -->
+                <div id="tab-analytics" class="tab-screen">
+                    <div class="note-banner">
+                        <span class="ni">ℹ️</span>
+                        <div><b>Eslatma:</b> "Jami videolar" va "Kategoriyalar" kartalari Firebase'dagi haqiqiy video
+                            katalogidan hisoblanadi. Tomosha vaqti va boshqa ba'zi ko'rsatkichlar hozircha
+                            <b>namuna (demo)</b> qiymatlar — chunki ulardan foydalanish uchun alohida tracking
+                            backend kerak bo'ladi (bu loyihada mavjud emas). Foydalanuvchilar soni endi haqiqiy
+                            ro'yxatdan o'tganlar sonidan olinadi.
+                        </div>
+                    </div>
+                    <div class="analytics-grid" id="analytics-cards"></div>
+
+                    <div class="chart-card" style="margin-bottom:20px;">
+                        <div class="chart-header">
+                            <div class="chart-title">📈 Oylik video qo'shilishi (namuna)</div>
+                            <div class="tag">12 oy</div>
+                        </div>
+                        <div class="bar-chart" id="monthly-chart" style="height:160px;"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">👥 Haftalik foydalanuvchi ushlanishi (namuna)</div>
+                            <div class="tag gold">Kohort</div>
+                        </div>
+                        <div id="retention-table"></div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════
+           TAB: VIDEOS
+           ══════════════════════════════ -->
+                <div id="tab-videos" class="tab-screen">
+                    <div class="toolbar">
+                        <div class="search-box">
+                            <span>🔍</span>
+                            <input type="text" placeholder="Videolarni qidirish…" oninput="filterVideos(this.value)"
+                                id="video-search-input">
+                        </div>
+                        <select class="form-select" style="width:auto;padding:9px 14px;" id="video-cat-filter"
+                            onchange="filterVideosByCategory(this.value)">
+                            <option value="">Barcha kategoriyalar</option>
+                            <option>Jangari</option>
+                            <option>Drama</option>
+                            <option>Fantastika</option>
+                            <option>Komediya</option>
+                            <option>Hujjatli</option>
+                            <option>Triller</option>
+                            <option>Romantik</option>
+                            <option>Qo'rqinchli</option>
+                            <option>Animatsiya</option>
+                            <option>Boshqa</option>
+                        </select>
+                        <button class="btn-primary" onclick="switchTab('upload')">+ Video qo'shish</button>
+                    </div>
+                    <div class="card" style="padding:0;overflow:auto;">
+                        <table class="data-table" id="videos-table">
+                            <thead>
+                                <tr>
+                                    <th>Video</th>
+                                    <th>Kategoriya</th>
+                                    <th>Hajmi</th>
+                                    <th>Fayl turi</th>
+                                    <th>Qo'shilgan</th>
+                                    <th>Amallar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="videos-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════
+           TAB: UPLOAD
+           ══════════════════════════════ -->
+                <div id="tab-upload" class="tab-screen">
+                    <div class="upload-area">
+                        <!-- Yo'riqnoma -->
+                        <div>
+                            <div class="howto-card">
+                                <div class="section-title" style="margin-bottom:6px;">📎 Telegramdan video qanday
+                                    qo'shiladi?</div>
+                                <div class="howto-step">
+                                    <div class="howto-num">1</div>
+                                    <div class="howto-text"><b>Kanalga videoni yuklang</b><span>Telegram kanalingizga
+                                            (yoki guruhingizga) video faylni oddiy xabar sifatida yuboring.</span>
+                                    </div>
+                                </div>
+                                <div class="howto-step">
+                                    <div class="howto-num">2</div>
+                                    <div class="howto-text"><b>Xabar havolasini nusxalang</b><span>Yuborilgan video
+                                            xabarini bosib turing → "Nusxalash" / "Copy Link" tugmasini tanlang.
+                                            Havola
+                                            <code>https://t.me/c/...</code> yoki
+                                            <code>https://t.me/kanal_nomi/...</code>
+                                            ko'rinishida bo'ladi.</span>
+                                    </div>
+                                </div>
+                                <div class="howto-step">
+                                    <div class="howto-num">3</div>
+                                    <div class="howto-text"><b>Muqova rasm tanlang (ixtiyoriy)</b><span>O'ngdagi
+                                            formadan video uchun muqova (thumbnail) rasm tanlang — u
+                                            foydalanuvchi ilovasida shu video ustida ko'rinadi.</span></div>
+                                </div>
+                                <div class="howto-step">
+                                    <div class="howto-num">4</div>
+                                    <div class="howto-text"><b>Havolani shu yerga joylashtiring</b><span>Telegram
+                                            havolasini joylashtirib, "Yuklash va e'lon qilish" tugmasini
+                                            bosing.</span></div>
+                                </div>
+                                <div class="howto-step">
+                                    <div class="howto-num">✓</div>
+                                    <div class="howto-text"><b>Tayyor!</b><span>Backend Telegram'dan video
+                                            ma'lumotlarini o'qib, uni katalogga qo'shadi. Foydalanuvchilarning
+                                            "Bildirishnomalar" bo'limiga avtomatik "Yangi video" xabari
+                                            yuboriladi.</span></div>
+                                </div>
+                            </div>
+
+                            <div class="status-box" id="upload-status-box">
+                                <span class="spinner-sm" id="upload-status-spinner"></span>
+                                <span id="upload-status-text"></span>
+                            </div>
+                        </div>
+
+                        <!-- Forma -->
+                        <div class="card">
+                            <div class="form-group">
+                                <label class="form-label">Telegram post havolasi *</label>
+                                <input class="form-input" id="upload-link" placeholder="https://t.me/c/1234567890/5432">
+                                <div class="form-hint">Yopiq kanal: <code>t.me/c/KANAL_ID/XABAR_ID</code> · Ochiq
+                                    kanal: <code>t.me/kanal_nomi/XABAR_ID</code></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Sarlavha (ixtiyoriy)</label>
+                                <input class="form-input" id="upload-title"
+                                    placeholder="Bo'sh qoldirsangiz, Telegramdagi fayl nomidan olinadi">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Muqova rasm (thumbnail, ixtiyoriy)</label>
+                                <div class="thumb-upload-box">
+                                    <div class="thumb-preview" id="thumb-preview">🖼️</div>
+                                    <input type="file" id="upload-thumb-file" accept="image/*" style="display:none;"
+                                        onchange="onThumbFileChosen(this)">
+                                    <button class="btn-secondary" type="button"
+                                        onclick="document.getElementById('upload-thumb-file').click()">Rasm
+                                        tanlash</button>
+                                    <button class="btn-secondary" type="button" id="thumb-clear-btn"
+                                        style="display:none;" onclick="clearThumbFile()">Olib tashlash</button>
+                                </div>
+                                <div class="form-hint" id="thumb-status-hint">Rasm tanlansa, "Yuklash" bosilganda
+                                    avtomatik rasm xostingiga yuklanadi va video ustida ko'rsatiladi.</div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                <div class="form-group">
+                                    <label class="form-label">Kategoriya</label>
+                                    <select class="form-select" id="upload-cat">
+                                        <option value="Boshqa">Boshqa</option>
+                                        <option>Jangari</option>
+                                        <option>Drama</option>
+                                        <option>Fantastika</option>
+                                        <option>Komediya</option>
+                                        <option>Hujjatli</option>
+                                        <option>Triller</option>
+                                        <option>Romantik</option>
+                                        <option>Qo'rqinchli</option>
+                                        <option>Animatsiya</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Teglar (vergul bilan)</label>
+                                    <input class="form-input" id="upload-tags" placeholder="Yangi, 4K, Trend…">
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:10px;margin-top:6px;">
+                                <button class="btn-primary" style="flex:1;" onclick="submitUpload()" id="submit-btn">📤
+                                    Yuklash va e'lon qilish</button>
+                                <button class="btn-secondary" onclick="resetUploadForm()">Tozalash</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════
+           TAB: USERS
+           ══════════════════════════════ -->
+                <div id="tab-users" class="tab-screen">
+                    <div class="note-banner">
+                        <span class="ni">ℹ️</span>
+                        <div><b>Eslatma:</b> Bu ro'yxat endi <b>haqiqiy</b> foydalanuvchilar — StreamX ilovasida
+                            ro'yxatdan o'tgan har bir kishi shu yerda Firebase (<code>/users</code>) orqali
+                            ko'rinadi. "Onlayn/Oflayn" holati va ko'rishlar soni hozircha taxminiy ko'rsatkich
+                            sifatida berilgan, chunki real vaqt seans kuzatuvi (presence tracking) ushbu loyihada
+                            mavjud emas.</div>
+                    </div>
+                    <div class="toolbar">
+                        <div class="search-box" style="max-width:300px;">
+                            <span>🔍</span>
+                            <input type="text" placeholder="Foydalanuvchini qidirish…"
+                                oninput="filterUsers(this.value)">
+                        </div>
+                        <div class="users-filter" style="margin:0;">
+                            <div class="filter-pill active" onclick="filterUserStatus('all',this)">Barchasi</div>
+                        </div>
+                        <button class="btn-secondary" onclick="loadUsersFromFirebase().then(()=>renderUsers())">🔄
+                            Yangilash</button>
+                    </div>
+                    <div class="card" style="padding:0;overflow:hidden;">
+                        <div id="users-list"></div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════
+           TAB: NOTIFICATIONS
+           ══════════════════════════════ -->
+                <div id="tab-notifications" class="tab-screen">
+                    <div class="note-banner">
+                        <span class="ni">ℹ️</span>
+                        <div><b>Eslatma:</b> Bu yerdan yuborilgan xabarlar Firebase (<code>/notifications</code>)
+                            orqali StreamX foydalanuvchi ilovasidagi "Bildirishnomalar" bo'limida haqiqatda
+                            ko'rinadi. Yangi video qo'shilganda ham shu ro'yxatga avtomatik yozuv qo'shiladi.</div>
+                    </div>
+                    <div class="notif-compose">
+                        <div class="section-title">📣 E'lon yuborish</div>
+                        <div class="form-group">
+                            <label class="form-label">Bildirishnoma sarlavhasi</label>
+                            <input class="form-input" id="notif-title-input" placeholder="Nima bo'layapti?">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Xabar matni</label>
+                            <textarea class="form-input form-textarea" id="notif-body-input"
+                                placeholder="E'loningizni yozing…" rows="3"></textarea>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                            <select class="form-select" id="notif-audience" style="width:auto;padding:10px 14px;">
+                                <option value="all">Barcha foydalanuvchilar</option>
+                            </select>
+                            <select class="form-select" id="notif-type" style="width:auto;padding:10px 14px;">
+                                <option value="📢">📢 E'lon</option>
+                                <option value="🎬">🎬 Yangi video</option>
+                                <option value="🎉">🎉 Aksiya</option>
+                                <option value="⚡">⚡ Ogohlantirish</option>
+                            </select>
+                            <button class="btn-primary" onclick="sendNotification()">Yuborish</button>
+                        </div>
+                    </div>
+
+                    <div class="section-title">📬 Yuborilgan bildirishnomalar</div>
+                    <div id="sent-notifs"></div>
+                </div>
+
+                <!-- ══════════════════════════════
+           TAB: SETTINGS
+           ══════════════════════════════ -->
+                <div id="tab-settings" class="tab-screen">
+                    <div class="settings-group">
+                        <div class="settings-section-head">Ulanish (Backend)</div>
+                        <div class="config-row">
+                            <span class="si-label">🔗 Backend manzili (BACKEND_URL)</span>
+                            <input type="text" id="cfg-backend-url" placeholder="http://localhost:8000">
+                        </div>
+                        <div class="config-row">
+                            <span class="si-label">🔥 Firebase DB manzili</span>
+                            <input type="text" id="cfg-db-url" placeholder="https://...firebasedatabase.app">
+                        </div>
+                        <div class="config-row">
+                            <button class="btn-secondary" style="margin-left:auto;" onclick="saveConfig()">Saqlash va
+                                qayta ulanish</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-section-head">Platforma</div>
+                        <div class="settings-item">
+                            <span class="si-icon">🏷️</span>
+                            <div style="flex:1;">
+                                <div style="font-size:14px;font-weight:600;">Platforma nomi</div>
+                                <div style="font-size:12px;color:var(--txt-muted);">Brauzer sarlavhasida ko'rinadi
+                                </div>
+                            </div>
+                            <input class="form-input" value="StreamX"
+                                style="width:160px;padding:8px 12px;font-size:13px;">
+                        </div>
+                        <div class="settings-item">
+                            <span class="si-icon">🌐</span>
+                            <span class="si-label">Texnik xizmat rejimi</span>
+                            <div class="toggle" id="tog-maintenance" onclick="toggleAdminSetting('maintenance')">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="si-icon">📝</span>
+                            <span class="si-label">Yangi foydalanuvchilar ro'yxatdan o'tishi</span>
+                            <div class="toggle on" id="tog-registration" onclick="toggleAdminSetting('registration')">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-section-head">Kontent moderatsiyasi</div>
+                        <div class="settings-item">
+                            <span class="si-icon">🤖</span>
+                            <span class="si-label">Yuklamalarni avtomoderatsiya qilish</span>
+                            <div class="toggle on" id="tog-automod" onclick="toggleAdminSetting('automod')">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="si-icon">✅</span>
+                            <span class="si-label">Admin tasdig'ini talab qilish</span>
+                            <div class="toggle" id="tog-approval" onclick="toggleAdminSetting('approval')">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="si-icon">🚫</span>
+                            <span class="si-label">Maksimal video hajmi (Telegram cheklovi)</span>
+                            <span class="si-right">≈ 2 GB</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-section-head">Translyatsiya (Streaming)</div>
+                        <div class="settings-item">
+                            <span class="si-icon">📶</span>
+                            <span class="si-label">Range (qism-baytli) oqim</span>
+                            <div class="toggle on" id="tog-abr" onclick="toggleAdminSetting('abr')">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="si-icon">💾</span>
+                            <span class="si-label">Diskka avtomatik keshlash</span>
+                            <span class="si-right">Yoqilgan (48 soat)</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="si-icon">🔵</span>
+                            <span class="si-label">Video manbasi</span>
+                            <span class="si-right">Telegram</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="si-icon">🖼️</span>
+                            <span class="si-label">Muqova rasm xostingi</span>
+                            <span class="si-right">ImgBB</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-section-head">Xavfli hudud</div>
+                        <div class="settings-item">
+                            <span class="si-icon">🗑️</span>
+                            <span class="si-label">Tomosha tarixini tozalash</span>
+                            <button class="btn-danger" style="padding:7px 14px;font-size:12px;"
+                                onclick="showToast('Tomosha tarixi tozalandi! (namuna)','warning')">Tozalash</button>
+                        </div>
+                        <div class="settings-item">
+                            <span class="si-icon">💾</span>
+                            <span class="si-label">Video katalogini eksport qilish</span>
+                            <button class="btn-secondary" style="padding:7px 14px;font-size:12px;"
+                                onclick="exportData()">CSV eksport</button>
+                        </div>
+                    </div>
+                    <div style="height:20px;"></div>
+                </div>
+
+            </div><!-- /content -->
+        </div><!-- /main -->
+    </div><!-- /app -->
+
+    <script>
+        /* ============================================================
+           KONFIGURATSIYA
+           Bu yerdagi manzillarni o'z muhitingizga mosligini
+           tekshiring (yoki "Sozlamalar" bo'limidan o'zgartiring).
+           ============================================================ */
+        let BACKEND_URL = localStorage.getItem('streamx_backend_url') || "http://localhost:8000";
+        let DB_URL = localStorage.getItem('streamx_db_url') || "https://anime-fee0d-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+        // Muqova rasmlarini yuklash uchun ImgBB API kaliti — barcha rasmlar
+        // shu xostingga yuklanadi va olingan havola video yozuviga
+        // "thumbnail" maydoni sifatida saqlanadi.
+        const IMGBB_API_KEY = "cb707a7edd38a0cea7241054094771dc";
+
+        /* ============================================================
+           HAQIQIY MA'LUMOTLAR (Firebase + Backend orqali)
+           ============================================================ */
+        let VIDEOS = [];              // Firebase'dan kelgan haqiqiy video katalogi
+        let filteredVideos = [];
+        let videosLoaded = false;
+
+        let USERS_DATA = [];          // Firebase /users dan kelgan haqiqiy foydalanuvchilar
+        let usersLoaded = false;
+
+        let selectedThumbFile = null; // Tanlangan muqova rasm fayli (yuklashdan oldin)
+
+        const CATEGORY_EMOJI = {
+            "Jangari": "⚔️", "Drama": "🎭", "Fantastika": "🚀", "Komediya": "😂",
+            "Hujjatli": "📽️", "Triller": "🔍", "Romantik": "💖", "Qo'rqinchli": "👻",
+            "Animatsiya": "🎨", "Boshqa": "🎬"
+        };
+        const CATEGORY_COLORS = ["#7c5cfc", "#c471ed", "#f64f59", "#12c2e9", "#f9ca24", "#10b981", "#3b82f6", "#ec4899", "#f97316"];
+
+        /* ============================================================
+           NAMUNA (DEMO) MA'LUMOTLAR — bildirishnomalar ro'yxati
+           boshlang'ich holati. Haqiqiy bildirishnomalar Firebase
+           /notifications orqali yuboriladi va shu ro'yxatga qo'shiladi.
+           ============================================================ */
+        const SENT_NOTIFS = [];
+
+        const adminSettings = { maintenance: false, registration: true, automod: true, approval: false, abr: true };
+
+        // Joriy seans davomida sodir bo'lgan haqiqiy hodisalar jurnali
+        let activityLog = [
+            { icon: '🟢', bg: 'rgba(16,185,129,.12)', title: "Admin panel ishga tushdi", time: timeAgoNow() }
+        ];
+
+        /* ============================================================
+           YORDAMCHI FUNKSIYALAR
+           ============================================================ */
+        function formatBytes(bytes) {
+            if (!bytes || bytes <= 0) return "0 B";
+            const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+            let i = 0; let val = bytes;
+            while (val >= 1024 && i < units.length - 1) { val /= 1024; i++; }
+            return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${units[i]}`;
+        }
+
+        function formatDate(ms) {
+            if (!ms) return "—";
+            const d = new Date(ms);
+            return d.toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+                ' ' + d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function timeAgo(ms) {
+            if (!ms) return "—";
+            const diff = Date.now() - ms;
+            const min = Math.floor(diff / 60000);
+            if (min < 1) return "hozirgina";
+            if (min < 60) return `${min} daqiqa oldin`;
+            const hr = Math.floor(min / 60);
+            if (hr < 24) return `${hr} soat oldin`;
+            const day = Math.floor(hr / 24);
+            if (day < 30) return `${day} kun oldin`;
+            return formatDate(ms);
+        }
+
+        function timeAgoNow() { return "hozirgina"; }
+
+        function pushActivity(icon, bg, title) {
+            activityLog.unshift({ icon, bg, title, time: timeAgoNow(), ts: Date.now() });
+            if (activityLog.length > 8) activityLog.pop();
+            renderActivityFeed();
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        /* ============================================================
+           BACKEND BILAN ULANISHNI TEKSHIRISH
+           ============================================================ */
+        async function checkBackendStatus() {
+            const badge = document.getElementById('backend-live-badge');
+            const text = document.getElementById('backend-live-text');
+            try {
+                const res = await fetch(`${BACKEND_URL}/`, { method: 'GET' });
+                if (!res.ok) throw new Error('offline');
+                const data = await res.json();
+                badge.classList.remove('offline');
+                text.textContent = data.telegram_authorized ? 'Backend ulandi' : 'Backend ulandi (Telegram kutilmoqda)';
+            } catch (err) {
+                badge.classList.add('offline');
+                text.textContent = 'Backend offline';
+            }
+        }
+
+        /* ============================================================
+           SIDEBAR
+           ============================================================ */
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('open');
+        }
+
+        /* ============================================================
+           TAB NAVIGATION
+           ============================================================ */
+        const tabTitles = {
+            dashboard: ['Boshqaruv paneli', 'Xush kelibsiz, Admin!'],
+            analytics: ['Analitika', 'Platforma ko\'rsatkichlari'],
+            videos: ['Videolar', 'Barcha videolarni boshqarish'],
+            upload: ['Video yuklash', 'Telegramdan video qo\'shish'],
+            users: ['Foydalanuvchilar', 'A\'zolarni boshqarish'],
+            notifications: ['Bildirishnomalar', 'Xabarlarni yuborish va boshqarish'],
+            settings: ['Sozlamalar', 'Platforma konfiguratsiyasi'],
+        };
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+
+            const [title, sub] = tabTitles[tab] || [tab, ''];
+            document.getElementById('page-title').textContent = title;
+            document.getElementById('page-subtitle').textContent = sub;
+
+            closeSidebar();
+            onTabEnter(tab);
+        }
+
+        function onTabEnter(tab) {
+            switch (tab) {
+                case 'dashboard': renderDashboard(); break;
+                case 'analytics': renderAnalytics(); break;
+                case 'videos': renderVideosTable(); break;
+                case 'users': loadUsersFromFirebase().then(() => renderUsers()); break;
+                case 'notifications': renderNotifications(); break;
+                case 'settings': loadConfigInputs(); break;
+            }
+        }
+
+        /* ============================================================
+           VIDEO KATALOGINI FIREBASE'DAN YUKLASH (haqiqiy ma'lumot)
+           ============================================================ */
+        async function loadVideosFromFirebase() {
+            try {
+                const res = await fetch(`${DB_URL}/videos.json`);
+                if (!res.ok) throw new Error('Firebase javob bermadi');
+                const data = await res.json();
+                if (data) {
+                    VIDEOS = Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] }))
+                        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                } else {
+                    VIDEOS = [];
+                }
+                filteredVideos = [...VIDEOS];
+                videosLoaded = true;
+                document.getElementById('videos-count-badge').textContent = VIDEOS.length;
+                return true;
+            } catch (err) {
+                console.error("Firebase'dan video yuklashda xatolik:", err);
+                videosLoaded = false;
+                return false;
+            }
+        }
+
+        /* ============================================================
+           FOYDALANUVCHILARNI FIREBASE'DAN YUKLASH (haqiqiy ma'lumot)
+           StreamX ilovasida ro'yxatdan o'tgan har bir login shu yerga
+           /users/{username} sifatida yoziladi (parol bilan birga).
+           ============================================================ */
+        async function loadUsersFromFirebase() {
+            try {
+                const res = await fetch(`${DB_URL}/users.json`);
+                if (!res.ok) throw new Error('Firebase javob bermadi');
+                const data = await res.json();
+                USERS_DATA = data ? Object.keys(data).map(key => ({
+                    id: key,
+                    name: data[key].name || key,
+                    handle: '@' + key,
+                    joined: timeAgo(data[key].createdAt),
+                    createdAt: data[key].createdAt || 0,
+                    status: 'offline',
+                    plan: 'Bepul',
+                })) : [];
+                USERS_DATA.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                usersLoaded = true;
+                document.getElementById('users-count-badge').textContent = USERS_DATA.length;
+                return true;
+            } catch (err) {
+                console.error("Firebase'dan foydalanuvchilarni yuklashda xatolik:", err);
+                usersLoaded = false;
+                return false;
+            }
+        }
+
+        async function refreshAll() {
+            const btn = document.getElementById('refresh-btn');
+            btn.classList.add('spinning');
+            showToast('Ma\'lumotlar yangilanmoqda…', 'info');
+            await checkBackendStatus();
+            const ok = await loadVideosFromFirebase();
+            await loadUsersFromFirebase();
+            btn.classList.remove('spinning');
+            if (ok) {
+                showToast('Ma\'lumotlar yangilandi!', 'success');
+            } else {
+                showToast('Firebase bilan bog\'lanib bo\'lmadi. DB_URL manzilini tekshiring.', 'error');
+            }
+            const activeTab = document.querySelector('.nav-link.active')?.dataset.tab || 'dashboard';
+            onTabEnter(activeTab);
+        }
+
+        /* ============================================================
+           DASHBOARD
+           ============================================================ */
+        async function renderDashboard() {
+            if (!videosLoaded) await loadVideosFromFirebase();
+            if (!usersLoaded) await loadUsersFromFirebase();
+            renderStatCards();
+            renderViewsChart();
+            renderDonut();
+            renderMostWatched();
+            renderActivityFeed();
+        }
+
+        function renderStatCards() {
+            const totalSize = VIDEOS.reduce((sum, v) => sum + (v.fileSize || 0), 0);
+            const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+            const addedToday = VIDEOS.filter(v => v.createdAt && v.createdAt >= todayStart.getTime()).length;
+            const categories = new Set(VIDEOS.map(v => v.category || 'Boshqa'));
+            const usersToday = USERS_DATA.filter(u => u.createdAt && u.createdAt >= todayStart.getTime()).length;
+
+            const stats = [
+                { icon: '🎬', label: 'Jami videolar', val: VIDEOS.length, change: 'Firebase katalogidan', pos: true, cls: '' },
+                { icon: '💾', label: 'Umumiy hajm', val: formatBytes(totalSize), change: 'Barcha videolar', pos: true, cls: 'warm' },
+                { icon: '🆕', label: 'Bugun qo\'shilgan video', val: addedToday, change: 'Joriy kun', pos: addedToday > 0, cls: 'green' },
+                { icon: '🗂', label: 'Kategoriyalar', val: categories.size, change: 'Faol kategoriyalar', pos: true, cls: 'gold' },
+                { icon: '👥', label: 'Jami foydalanuvchilar', val: USERS_DATA.length, change: 'Ro\'yxatdan o\'tganlar', pos: true, cls: '' },
+                { icon: '🆕', label: 'Bugun ro\'yxatdan o\'tdi', val: usersToday, change: 'Joriy kun', pos: usersToday > 0, cls: 'green' },
+            ];
+            document.getElementById('stat-cards').innerHTML = stats.map(s => `
+    <div class="stat-card ${s.cls}">
+      <div class="stat-icon">${s.icon}</div>
+      <div class="stat-val">${s.val}</div>
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-change ${s.pos ? 'pos' : 'neutral'}">${s.change}</div>
+    </div>
+  `).join('');
+        }
+
+        function renderViewsChart() {
+            const top = [...VIDEOS].sort((a, b) => (b.fileSize || 0) - (a.fileSize || 0)).slice(0, 7);
+            const wrap = document.getElementById('views-chart');
+            if (top.length === 0) {
+                wrap.innerHTML = `<div class="empty-state" style="width:100%;padding:20px;"><div class="ei">📭</div>Hali video yo'q</div>`;
+                return;
+            }
+            const max = Math.max(...top.map(v => v.fileSize || 1));
+            wrap.innerHTML = top.map(v => `
+    <div class="bar-col">
+      <div class="bar-val">${formatBytes(v.fileSize)}</div>
+      <div class="bar" style="height:${((v.fileSize || 0) / max) * 100}%;" data-tip="${escapeHtml(v.title)}: ${formatBytes(v.fileSize)}"></div>
+      <div class="bar-label" style="max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml((v.title || '').slice(0, 8))}</div>
+    </div>
+  `).join('');
+        }
+
+        function renderDonut() {
+            const counts = {};
+            VIDEOS.forEach(v => { const c = v.category || 'Boshqa'; counts[c] = (counts[c] || 0) + 1; });
+            const total = VIDEOS.length;
+            document.getElementById('donut-val').textContent = total;
+
+            const svg = document.getElementById('donut-svg');
+            const legend = document.getElementById('donut-legend');
+
+            if (total === 0) {
+                svg.innerHTML = `<circle cx="65" cy="65" r="52" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="18"/>`;
+                legend.innerHTML = `<div style="font-size:12px;color:var(--txt-muted);text-align:center;">Hali ma'lumot yo'q</div>`;
+                return;
+            }
+
+            const cats = Object.entries(counts).map(([name, count], i) => ({
+                name, val: Math.round((count / total) * 100), count,
+                color: CATEGORY_COLORS[i % CATEGORY_COLORS.length]
+            }));
+
+            const r = 52, cx = 65, cy = 65, circ = 2 * Math.PI * r;
+            let offset = 0;
+            svg.innerHTML = cats.map(c => {
+                const dash = (c.count / total) * circ;
+                const el = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.color}" stroke-width="18"
+      stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${-offset}" stroke-linecap="butt"/>`;
+                offset += dash;
+                return el;
+            }).join('');
+            legend.innerHTML = cats.map(c => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${c.color};"></div>
+      <span style="color:var(--txt-secondary);">${escapeHtml(c.name)}</span>
+      <span style="margin-left:auto;font-weight:700;">${c.count}</span>
+    </div>
+  `).join('');
+        }
+
+        function renderMostWatched() {
+            const wrap = document.getElementById('most-watched-dash');
+            const recent = [...VIDEOS].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 5);
+            if (recent.length === 0) {
+                wrap.innerHTML = `<div class="empty-state"><div class="ei">🎬</div>Hali video qo'shilmagan.<br><span style="font-size:12px;">"Video yuklash" bo'limidan birinchi videongizni qo'shing.</span></div>`;
+                return;
+            }
+            wrap.innerHTML = recent.map((v, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="font-size:18px;font-weight:900;color:var(--txt-muted);width:20px;">${i + 1}</div>
+      <div style="width:42px;height:28px;border-radius:6px;background:var(--bg-glass2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:18px;">${v.thumbnail ? `<img src="${v.thumbnail}" style="width:100%;height:100%;object-fit:cover;">` : (CATEGORY_EMOJI[v.category] || '🎬')}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</div>
+        <div style="font-size:11px;color:var(--txt-muted);">${escapeHtml(v.category || 'Boshqa')} · ${formatBytes(v.fileSize)}</div>
+      </div>
+      <div style="font-size:12px;color:var(--txt-muted);white-space:nowrap;">🕐 ${timeAgo(v.createdAt)}</div>
+    </div>
+  `).join('');
+        }
+
+        function renderActivityFeed() {
+            const el = document.getElementById('activity-feed');
+            if (!el) return;
+            el.innerHTML = activityLog.map(a => `
+    <div class="activity-item">
+      <div class="act-icon" style="background:${a.bg};">${a.icon}</div>
+      <div class="act-info">
+        <div class="act-title">${escapeHtml(a.title)}</div>
+        <div class="act-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+        }
+
+        /* ============================================================
+           ANALYTICS  (video va foydalanuvchi qismi haqiqiy, qolgani namuna)
+           ============================================================ */
+        function renderAnalytics() {
+            const totalSize = VIDEOS.reduce((sum, v) => sum + (v.fileSize || 0), 0);
+            const avgSize = VIDEOS.length ? totalSize / VIDEOS.length : 0;
+            const categories = new Set(VIDEOS.map(v => v.category || 'Boshqa'));
+
+            const metrics = [
+                { title: 'JAMI VIDEOLAR', val: String(VIDEOS.length), sub: 'Firebase katalogida', trend: 'haqiqiy', up: true, real: true },
+                { title: 'UMUMIY HAJM', val: formatBytes(totalSize), sub: 'Barcha videolar', trend: 'haqiqiy', up: true, real: true },
+                { title: 'O\'RTACHA FAYL HAJMI', val: formatBytes(avgSize), sub: 'Video boshiga', trend: 'haqiqiy', up: true, real: true },
+                { title: 'KATEGORIYALAR', val: String(categories.size), sub: 'Faol turlar', trend: 'haqiqiy', up: true, real: true },
+                { title: 'RO\'YXATDAN O\'TGANLAR', val: String(USERS_DATA.length), sub: 'Jami foydalanuvchi', trend: 'haqiqiy', up: true, real: true },
+                { title: 'O\'RTACHA SEANS', val: '34m 12s', sub: 'Foydalanuvchi/kun', trend: '+3m', up: true, real: false },
+            ];
+            document.getElementById('analytics-cards').innerHTML = metrics.map(m => `
+    <div class="metric-card">
+      <div class="metric-header">
+        <div class="metric-title">${m.title}</div>
+        <div class="metric-trend ${m.up ? 'up' : 'down'}">${m.real ? '<span class="tag green" style="font-size:9px;">REAL</span>' : '<span class="tag muted">namuna</span>'}</div>
+      </div>
+      <div class="metric-val">${m.val}</div>
+      <div class="metric-sub">${m.sub}</div>
+    </div>`).join('');
+
+            // Oylik grafik (namuna)
+            const months = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+            const mvals = [28, 35, 42, 55, 48, 62, 70, 85, 78, 88, 92, 95];
+            const mmax = Math.max(...mvals);
+            document.getElementById('monthly-chart').innerHTML = months.map((m, i) => `
+    <div class="bar-col">
+      <div class="bar-val">${mvals[i]}</div>
+      <div class="bar" style="height:${(mvals[i] / mmax) * 100}%;background:var(--grad-${i >= 9 ? 'warm' : 'primary'});" data-tip="${m}: ${mvals[i]}"></div>
+      <div class="bar-label">${m}</div>
+    </div>
+  `).join('');
+
+            // Retention jadvali (namuna)
+            const weeks = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
+            const retention = [
+                [100, 72, 58, 48, 41, 36],
+                [100, 75, 61, 50, 43, null],
+                [100, 70, 55, 46, null, null],
+                [100, 73, 59, null, null, null],
+                [100, 68, null, null, null, null],
+                [100, null, null, null, null, null],
+            ];
+            document.getElementById('retention-table').innerHTML = `
+    <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead><tr><th>Kohort</th>${weeks.map(w => `<th>${w}</th>`).join('')}</tr></thead>
+      <tbody>
+        ${retention.map((row, i) => `<tr><td style="font-weight:700;">${i + 1}-hafta</td>${row.map(v => v === null ? `<td style="color:var(--txt-muted);">–</td>` : `<td><span style="padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;background:rgba(124,92,252,${v / 100 * .35});color:${v > 70 ? '#c4b5fd' : v > 50 ? 'var(--txt-secondary)' : 'var(--txt-muted)'}">${v}%</span></td>`).join('')}</tr>`).join('')}
+      </tbody>
+    </table>
+    </div>`;
+        }
+
+        /* ============================================================
+           VIDEOLAR JADVALI
+           ============================================================ */
+        function renderVideosTable(videos = filteredVideos) {
+            document.getElementById('videos-count-badge').textContent = VIDEOS.length;
+            const tbody = document.getElementById('videos-tbody');
+            if (!videosLoaded) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--txt-muted);"><span class="spinner-sm"></span> Yuklanmoqda…</td></tr>`;
+                return;
+            }
+            if (videos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="ei">📭</div>Video topilmadi.<br><span style="font-size:12px;">"Video yuklash" bo'limidan yangi video qo'shing.</span></div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = videos.map(v => `
+    <tr>
+      <td><div class="thumb-cell">
+        <div class="video-thumb-sm">${v.thumbnail ? `<img src="${v.thumbnail}" alt="">` : (CATEGORY_EMOJI[v.category] || '🎬')}</div>
+        <div style="max-width:220px;">
+          <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</div>
+          <div style="font-size:11px;color:var(--txt-muted);">${(v.tags || []).join(', ') || 'Teg yo\'q'}</div>
+        </div>
+      </div></td>
+      <td><span class="tag">${escapeHtml(v.category || 'Boshqa')}</span></td>
+      <td style="color:var(--txt-secondary);white-space:nowrap;">${formatBytes(v.fileSize)}</td>
+      <td style="color:var(--txt-muted);font-size:12px;">${escapeHtml(v.mimeType || '—')}</td>
+      <td style="color:var(--txt-muted);white-space:nowrap;font-size:12px;">${formatDate(v.createdAt)}</td>
+      <td><div class="action-btns">
+        <div class="action-btn edit" onclick="copyStreamLink('${v.firebaseKey}')" title="Oqim havolasini nusxalash">🔗</div>
+        <div class="action-btn edit" onclick="window.open('${v.telegramLink}','_blank')" title="Telegramda ochish">📨</div>
+        <div class="action-btn del" onclick="deleteVideo('${v.firebaseKey}', '${escapeHtml(v.title).replace(/'/g, "\\'")}')" title="O'chirish">🗑️</div>
+      </div></td>
+    </tr>
+  `).join('');
+        }
+
+        function filterVideos(q) {
+            const query = q.toLowerCase();
+            const catSel = document.getElementById('video-cat-filter').value;
+            filteredVideos = VIDEOS.filter(v =>
+                (!catSel || v.category === catSel) &&
+                (v.title || '').toLowerCase().includes(query)
+            );
+            renderVideosTable(filteredVideos);
+        }
+
+        function filterVideosByCategory(cat) {
+            const q = document.getElementById('video-search-input').value.toLowerCase();
+            filteredVideos = VIDEOS.filter(v =>
+                (!cat || v.category === cat) &&
+                (v.title || '').toLowerCase().includes(q)
+            );
+            renderVideosTable(filteredVideos);
+        }
+
+        function copyStreamLink(firebaseKey) {
+            const v = VIDEOS.find(x => x.firebaseKey === firebaseKey);
+            if (!v) return;
+            navigator.clipboard?.writeText(v.streamUrl).then(() => {
+                showToast('Oqim havolasi nusxalandi 📋', 'success');
+            }).catch(() => {
+                showToast(v.streamUrl, 'info');
+            });
+        }
+
+        async function deleteVideo(firebaseKey, title) {
+            if (!confirm(`"${title}" videosini o'chirmoqchimisiz? Bu amalni orqaga qaytarib bo'lmaydi.`)) return;
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/videos/${firebaseKey}`, { method: 'DELETE' });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.detail || "O'chirishda xatolik yuz berdi");
+                showToast(`"${title}" o'chirildi`, 'warning');
+                pushActivity('🗑️', 'rgba(246,79,89,.12)', `Video o'chirildi: ${title}`);
+                await loadVideosFromFirebase();
+                const activeTab = document.querySelector('.nav-link.active')?.dataset.tab || 'videos';
+                onTabEnter(activeTab);
+            } catch (err) {
+                showToast(err.message || "Backend bilan bog'lanib bo'lmadi", 'error');
+            }
+        }
+
+        /* ============================================================
+           MUQOVA RASM (THUMBNAIL) TANLASH VA IMGBB'GA YUKLASH
+           ============================================================ */
+        function onThumbFileChosen(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            selectedThumbFile = file;
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('thumb-preview').innerHTML = `<img src="${e.target.result}" alt="">`;
+            };
+            reader.readAsDataURL(file);
+            document.getElementById('thumb-clear-btn').style.display = 'inline-flex';
+            document.getElementById('thumb-status-hint').textContent = `Tanlandi: ${file.name}`;
+        }
+
+        function clearThumbFile() {
+            selectedThumbFile = null;
+            document.getElementById('upload-thumb-file').value = '';
+            document.getElementById('thumb-preview').innerHTML = '🖼️';
+            document.getElementById('thumb-clear-btn').style.display = 'none';
+            document.getElementById('thumb-status-hint').textContent = "Rasm tanlansa, \"Yuklash\" bosilganda avtomatik rasm xostingiga yuklanadi va video ustida ko'rsatiladi.";
+        }
+
+        // Faylni base64'ga o'tkazib ImgBB API'ga yuboradi, ochiq rasm
+        // havolasini (display_url) qaytaradi.
+        async function uploadThumbnailToImgbb(file) {
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = () => reject(new Error("Rasmni o'qib bo'lmadi"));
+                reader.readAsDataURL(file);
+            });
+            const form = new FormData();
+            form.append('key', IMGBB_API_KEY);
+            form.append('image', base64);
+            const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success) throw new Error("Rasmni ImgBB'ga yuklab bo'lmadi");
+            return data.data.display_url || data.data.url;
+        }
+
+        /* ============================================================
+           VIDEO YUKLASH (Telegram havolasi orqali)
+           ============================================================ */
+        function showUploadStatus(msg, isError = false) {
+            const box = document.getElementById('upload-status-box');
+            const spinner = document.getElementById('upload-status-spinner');
+            box.classList.add('show');
+            box.classList.toggle('err', isError);
+            spinner.style.display = isError ? 'none' : 'inline-block';
+            document.getElementById('upload-status-text').textContent = msg;
+        }
+        function hideUploadStatus() {
+            document.getElementById('upload-status-box').classList.remove('show');
+        }
+
+        async function submitUpload() {
+            const link = document.getElementById('upload-link').value.trim();
+            const title = document.getElementById('upload-title').value.trim();
+            const cat = document.getElementById('upload-cat').value;
+            const tags = document.getElementById('upload-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+
+            if (!link) { showToast("Telegram havolasini kiriting", 'error'); return; }
+            if (!/t\.me\//.test(link)) { showToast("Havola t.me/... ko'rinishida bo'lishi kerak", 'error'); return; }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-sm"></span> Yuklanmoqda…';
+
+            try {
+                // 1) Agar muqova rasm tanlangan bo'lsa — avval uni ImgBB'ga yuklaymiz
+                let thumbnailUrl = null;
+                if (selectedThumbFile) {
+                    showUploadStatus("Muqova rasm yuklanmoqda…");
+                    thumbnailUrl = await uploadThumbnailToImgbb(selectedThumbFile);
+                }
+
+                // 2) Videoni backend orqali Telegram'dan o'qib, Firebase'ga yozamiz
+                showUploadStatus("Telegram serveridan video ma'lumotlari olinmoqda…");
+                const res = await fetch(`${BACKEND_URL}/api/save-video`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telegramLink: link,
+                        customTitle: title || null,
+                        category: cat || null,
+                        tags,
+                        thumbnail: thumbnailUrl || null
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.detail || "Backend xatolik qaytardi");
+
+                const savedTitle = data.data?.title || title || 'Video';
+                const savedKey = data.data?.firebaseKey || data.data?.id || data.data?.key || null;
+
+                // 3) Agar backend javobi thumbnail maydonini o'zi saqlamagan bo'lsa,
+                //    rasm havolasini to'g'ridan-to'g'ri Firebase yozuviga qo'shamiz.
+                if (thumbnailUrl && savedKey) {
+                    try {
+                        await fetch(`${DB_URL}/videos/${savedKey}/thumbnail.json`, {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(thumbnailUrl)
+                        });
+                    } catch (e) { console.error('Thumbnail saqlashda xatolik:', e); }
+                }
+
+                // 4) Foydalanuvchilarga "Yangi video" bildirishnomasini Firebase orqali yuboramiz
+                try {
+                    const notif = {
+                        icon: '🎬',
+                        title: "Yangi video qo'shildi",
+                        body: savedTitle,
+                        color: 'rgba(124,92,252,.15)',
+                        videoId: savedKey,
+                        ts: Date.now(),
+                        read: false
+                    };
+                    await fetch(`${DB_URL}/notifications.json`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(notif)
+                    });
+                } catch (e) { console.error('Bildirishnoma yuborishda xatolik:', e); }
+
+                showUploadStatus(`"${savedTitle}" muvaffaqiyatli qo'shildi! 🎉`);
+                showToast(`"${savedTitle}" muvaffaqiyatli qo'shildi! 🎉`, 'success');
+                pushActivity('📤', 'rgba(16,185,129,.12)', `Yangi video qo'shildi: ${savedTitle}`);
+                SENT_NOTIFS.unshift({ icon: '🎬', title: "Yangi video qo'shildi", body: savedTitle, time: 'Hozirgina', audience: 'Barcha foydalanuvchilar', sent: USERS_DATA.length });
+                resetUploadForm(true);
+                await loadVideosFromFirebase();
+                setTimeout(hideUploadStatus, 2500);
+            } catch (err) {
+                const msg = err.message && err.message !== 'Failed to fetch'
+                    ? err.message
+                    : `Backend serveriga ulanib bo'lmadi (${BACKEND_URL}). Backend ishga tushganini va CORS sozlamalarini tekshiring.`;
+                showUploadStatus(msg, true);
+                showToast(msg, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "📤 Yuklash va e'lon qilish";
+            }
+        }
+
+        function resetUploadForm(keepStatus = false) {
+            document.getElementById('upload-link').value = '';
+            document.getElementById('upload-title').value = '';
+            document.getElementById('upload-cat').value = 'Boshqa';
+            document.getElementById('upload-tags').value = '';
+            clearThumbFile();
+            if (!keepStatus) hideUploadStatus();
+        }
+
+        /* ============================================================
+           FOYDALANUVCHILAR (Firebase orqali haqiqiy)
+           ============================================================ */
+        let currentUserFilter = 'all', userQuery = '';
+
+        function renderUsers() {
+            let filtered = USERS_DATA;
+            if (userQuery) filtered = filtered.filter(u => u.name.toLowerCase().includes(userQuery) || u.handle.toLowerCase().includes(userQuery));
+            document.getElementById('users-list').innerHTML = filtered.length ? filtered.map(u => `
+    <div class="user-row">
+      <div class="user-avatar-sm">${(u.name[0] || '?').toUpperCase()}</div>
+      <div class="user-info">
+        <div class="user-name">${escapeHtml(u.name)}</div>
+        <div class="user-meta">${u.handle} · ${u.joined} ro'yxatdan o'tgan</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-left:12px;">
+        <div class="action-btn del" onclick="deleteUser('${u.id}','${escapeHtml(u.name).replace(/'/g, "\\'")}')" title="O'chirish">🗑️</div>
+      </div>
+    </div>
+  `).join('') : `<div style="padding:40px;text-align:center;color:var(--txt-muted);">${usersLoaded ? "Hali ro'yxatdan o'tgan foydalanuvchi yo'q." : 'Yuklanmoqda…'}</div>`;
+        }
+
+        function filterUsers(q) { userQuery = q.toLowerCase(); renderUsers(); }
+        function filterUserStatus(status, el) {
+            currentUserFilter = status;
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            renderUsers();
+        }
+
+        async function deleteUser(username, name) {
+            if (!confirm(`"${name}" (${username}) foydalanuvchisini o'chirmoqchimisiz?`)) return;
+            try {
+                const res = await fetch(`${DB_URL}/users/${encodeURIComponent(username)}.json`, { method: 'DELETE' });
+                if (!res.ok) throw new Error("O'chirib bo'lmadi");
+                showToast(`${name} o'chirildi`, 'warning');
+                pushActivity('🗑️', 'rgba(246,79,89,.12)', `Foydalanuvchi o'chirildi: ${name}`);
+                await loadUsersFromFirebase();
+                renderUsers();
+            } catch (e) {
+                showToast(e.message || "Server bilan bog'lanib bo'lmadi", 'error');
+            }
+        }
+
+        /* ============================================================
+           BILDIRISHNOMALAR (Firebase orqali haqiqiy yuboriladi)
+           ============================================================ */
+        function renderNotifications() {
+            document.getElementById('sent-notifs').innerHTML = SENT_NOTIFS.length ? SENT_NOTIFS.map(n => `
+    <div class="notif-sent-item">
+      <div class="notif-icon-cell" style="background:rgba(124,92,252,.12);">${n.icon}</div>
+      <div class="notif-info">
+        <div class="notif-title-row">
+          <div class="notif-title-txt">${escapeHtml(n.title)}</div>
+          <span class="tag">${escapeHtml(n.audience)}</span>
+        </div>
+        <div class="notif-body-txt">${escapeHtml(n.body)}</div>
+        <div class="notif-footer-row">
+          <span class="notif-time-txt">📅 ${n.time}</span>
+          <span class="notif-time-txt">📨 ${n.sent} foydalanuvchiga yetkaziladi</span>
+        </div>
+      </div>
+    </div>
+  `).join('') : `<div style="padding:30px;text-align:center;color:var(--txt-muted);">Hali bildirishnoma yuborilmagan.</div>`;
+        }
+
+        async function sendNotification() {
+            const title = document.getElementById('notif-title-input').value.trim();
+            const body = document.getElementById('notif-body-input').value.trim();
+            const icon = document.getElementById('notif-type').value;
+            const aud = document.getElementById('notif-audience').options[document.getElementById('notif-audience').selectedIndex].text;
+            if (!title) { showToast("Bildirishnoma sarlavhasini kiriting", 'error'); return; }
+            if (!body) { showToast("Xabar matnini yozing", 'error'); return; }
+
+            try {
+                await fetch(`${DB_URL}/notifications.json`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ icon, title, body, color: 'rgba(124,92,252,.15)', ts: Date.now(), read: false })
+                });
+                SENT_NOTIFS.unshift({ icon, title, body, time: 'Hozirgina', audience: aud, sent: USERS_DATA.length });
+                renderNotifications();
+                pushActivity('🔔', 'rgba(124,92,252,.12)', `Bildirishnoma yuborildi: ${title}`);
+                document.getElementById('notif-title-input').value = '';
+                document.getElementById('notif-body-input').value = '';
+                showToast('Bildirishnoma ' + aud + ' uchun yuborildi! 📨', 'success');
+            } catch (e) {
+                showToast("Bildirishnomani yuborib bo'lmadi", 'error');
+            }
+        }
+
+        /* ============================================================
+           SOZLAMALAR
+           ============================================================ */
+        function toggleAdminSetting(key) {
+            adminSettings[key] = !adminSettings[key];
+            const el = document.getElementById('tog-' + key);
+            if (el) el.classList.toggle('on', adminSettings[key]);
+            const labels = { maintenance: 'Texnik xizmat rejimi', registration: "Ro'yxatdan o'tish", automod: 'Avtomoderatsiya', approval: 'Admin tasdig\'i', abr: 'Range oqim' };
+            showToast(`${labels[key] || key}: ${adminSettings[key] ? 'Yoqildi' : 'O\'chirildi'}`, adminSettings[key] ? 'success' : 'warning');
+        }
+
+        function loadConfigInputs() {
+            document.getElementById('cfg-backend-url').value = BACKEND_URL;
+            document.getElementById('cfg-db-url').value = DB_URL;
+        }
+
+        function saveConfig() {
+            const newBackend = document.getElementById('cfg-backend-url').value.trim();
+            const newDb = document.getElementById('cfg-db-url').value.trim();
+            if (newBackend) { BACKEND_URL = newBackend.replace(/\/$/, ''); localStorage.setItem('streamx_backend_url', BACKEND_URL); }
+            if (newDb) { DB_URL = newDb.replace(/\/$/, ''); localStorage.setItem('streamx_db_url', DB_URL); }
+            showToast('Sozlamalar saqlandi, qayta ulanmoqda…', 'info');
+            videosLoaded = false;
+            usersLoaded = false;
+            checkBackendStatus();
+            Promise.all([loadVideosFromFirebase(), loadUsersFromFirebase()]).then(() => onTabEnter('videos'));
+        }
+
+        function exportData() {
+            const rows = [['ID', 'Sarlavha', 'Kategoriya', 'Hajmi (bayt)', 'Fayl turi', 'Telegram havola', 'Qo\'shilgan sana'],
+            ...VIDEOS.map(v => [v.id, v.title, v.category, v.fileSize, v.mimeType, v.telegramLink, formatDate(v.createdAt)])];
+            const csv = rows.map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+            const a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            a.download = 'streamx-videolar.csv';
+            a.click();
+            showToast('CSV eksport qilindi!', 'success');
+        }
+
+        /* ============================================================
+           TOAST
+           ============================================================ */
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const icons = { success: '✅', error: '❌', info: '💡', warning: '⚠️' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${escapeHtml(msg)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0'; toast.style.transform = 'translateX(12px)';
+                toast.style.transition = 'all .3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        /* ============================================================
+           INIT
+           ============================================================ */
+        window.addEventListener('DOMContentLoaded', async () => {
+            checkBackendStatus();
+            await loadVideosFromFirebase();
+            await loadUsersFromFirebase();
+            renderDashboard();
+            showToast('Admin Panel yuklandi ⚡', 'success');
+        });
+    </script>
+</body>
+
+</html>
